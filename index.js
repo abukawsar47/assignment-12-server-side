@@ -125,7 +125,7 @@ async function run() {
             res.send(result);
         })
 
-        //put users
+        //put user
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
@@ -205,8 +205,8 @@ async function run() {
             res.send(result);
         })
 
-        //users/:email put
-        app.put('/users/:email', async (req, res) => {
+        //user/:email put
+        app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
             const filter = { email: email };
