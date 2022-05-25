@@ -172,6 +172,7 @@ async function run() {
             }
         })
 
+        // ==============================
         app.get('/order/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -179,8 +180,14 @@ async function run() {
             res.send(result);
         })
 
+        app.delete('/orders/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(query);
+            res.send(result);
+        })
 
-
+        // ===============================
         //get reviews
         app.get('/review', async (req, res) => {
             const query = {};
@@ -197,12 +204,20 @@ async function run() {
             const result = await reviewCollection.insertOne(order);
             res.send(result);
         })
-        /*   app.get('/review', async (req, res) => {
-              const cursor = reviewCollection.find({});
-              const reviews = await cursor.toArray();
-              console.log(reviews);
-              res.send(reviews);
-          }) */
+
+        //users/:email put
+        app.put('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: user,
+            };
+            const token = jwt.sign({ email: email }, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '1d' });
+            const updatedUser = await userCollection.updateOne(filter, updatedDoc, options)
+            res.send({ updatedUser, token });
+        })
 
     }
     finally {
