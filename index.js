@@ -24,7 +24,7 @@ function verifyJWT(req, res, next) {
         if (err) {
             return res.status(403).send({ message: 'Forbidden access' });
         }
-        console.log('decoded', decoded);
+        // console.log('decoded', decoded);
         req.decoded = decoded;
         next();
     })
@@ -60,6 +60,35 @@ async function run() {
             const cursor = productCollection.find(query);
             const products = await cursor.toArray();
             res.send(products);
+        })
+
+        //get product by id
+        app.get('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const product = await productCollection.findOne(query);
+            res.send(product);
+        })
+
+        //Post product
+        app.post('/product', async (req, res) => {
+            const newProduct = req.body;
+            const result = await productCollection.insertOne(newProduct);
+            res.send(result);
+        })
+
+        //get  product 
+        /*      app.get('/product', verifyJWT, verifyAdmin, async (req, res) => {
+                 const products = await productCollection.find().toArray();
+                 res.send(products);
+             }) */
+
+        //delete product
+        app.delete('/product/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: id };
+            const result = await productCollection.deleteOne(filter);
+            res.send(result);
         })
 
         //check is admin
@@ -101,13 +130,7 @@ async function run() {
             res.send(users);
         });
 
-        //get product by id
-        app.get('/product/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const product = await productCollection.findOne(query);
-            res.send(product);
-        })
+
         // post order
         app.post('/order', async (req, res) => {
             const order = req.body;
