@@ -42,6 +42,7 @@ async function run() {
         const orderCollection = database.collection('orders');
         const reviewCollection = database.collection('reviews');
         const userCollection = database.collection('users');
+        const paymentCollection = database.collection('payments');
 
         //verifyAdmin
         const verifyAdmin = async (req, res, next) => {
@@ -172,6 +173,21 @@ async function run() {
             }
         })
 
+        app.patch('/order/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+
+            const result = await paymentCollection.insertOne(payment);
+            const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
+            res.send(updatedOrder);
+        })
         // ==============================
         app.get('/order/:id', async (req, res) => {
             const id = req.params.id;
@@ -194,9 +210,7 @@ async function run() {
             const cursor = reviewCollection.find(query);
             const reviews = await cursor.toArray();
             res.send(reviews);
-            /*  const cursor = reviewCollection.find({});
-             const reviews = await cursor.toArray();
-             res.send(reviews); */
+
         })
         //post review
         app.post('/review', async (req, res) => {
@@ -206,7 +220,7 @@ async function run() {
         })
 
         //user/:email put
-        app.put('/user/:email', async (req, res) => {
+        app.patch('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
             const filter = { email: email };
