@@ -42,6 +42,7 @@ async function run() {
         const orderCollection = database.collection('orders');
         const reviewCollection = database.collection('reviews');
         const userCollection = database.collection('users');
+        const profileCollection = database.collection('profiles');
         const paymentCollection = database.collection('payments');
 
         //verifyAdmin
@@ -220,7 +221,7 @@ async function run() {
         })
 
         //user/:email put
-        app.put('/user/:email', async (req, res) => {
+        app.put('/profile/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
             const filter = { email: email };
@@ -228,9 +229,17 @@ async function run() {
             const updatedDoc = {
                 $set: user,
             };
-            const token = jwt.sign({ email: email }, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '1d' });
-            const updatedUser = await userCollection.updateOne(filter, updatedDoc, options)
-            res.send({ updatedUser, token });
+            const updatedUser = await profileCollection.updateOne(filter, updatedDoc, options)
+            res.send({ updatedUser });
+        })
+
+        // user get by id
+        app.get('/profile/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = { email: email }
+            const result = await profileCollection.findOne(query)
+            res.send(result);
         })
 
     }
