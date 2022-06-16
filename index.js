@@ -141,16 +141,18 @@ async function run() {
             res.send({ result, token });
         })
 
+        //delete user
+        app.delete('/user/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await userCollection.deleteOne(query);
+            res.send(result);
+        })
+
         //get users
         app.get('/user', verifyJWT, async (req, res) => {
             const users = await userCollection.find().toArray();
             res.send(users);
-        });
-
-        //get order
-        app.get('/order', verifyJWT, async (req, res) => {
-            const orders = await orderCollection.find().toArray();
-            res.send(orders);
         });
 
 
@@ -161,17 +163,30 @@ async function run() {
             res.send(result);
         })
         // get orders
+        /*       app.get('/order/:email', verifyJWT, async (req, res) => {
+                  const customer = req.query.customer;
+                  const decodedEmail = req.decoded.email;
+                  if (customer === decodedEmail) {
+                      const query = { customer: customer };
+                      const orders = await orderCollection.find(query).toArray();
+                      return res.send(orders);
+                  }
+                  else {
+                      res.status(403).send({ message: 'forbidden access' });
+                  }
+              }) */
+
         app.get('/order', verifyJWT, async (req, res) => {
             const customer = req.query.customer;
-            const decodedEmail = req.decoded.email;
-            if (customer === decodedEmail) {
+            try {
                 const query = { customer: customer };
-                const orders = await orderCollection.find(query).toArray();
-                return res.send(orders);
+                const order = await orderCollection.find(query).toArray();
+                return res.send(order);
             }
-            else {
-                res.status(403).send({ message: 'forbidden access' });
+            catch (error) {
+                return res.status(403).send({ message: 'forbidden access' });
             }
+
         })
 
         app.patch('/order/:id', verifyJWT, async (req, res) => {
@@ -189,6 +204,17 @@ async function run() {
             const updatedOrder = await orderCollection.updateOne(filter, updatedDoc);
             res.send(updatedOrder);
         })
+
+
+        //delete order nurul
+        app.delete('/myOrder/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
         // ==============================
         app.get('/order/:id', async (req, res) => {
             const id = req.params.id;
