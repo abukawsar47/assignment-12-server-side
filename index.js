@@ -163,6 +163,13 @@ async function run() {
             res.send(result);
         })
         // get orders
+
+        //get order
+        app.get('/allOrder', verifyJWT, async (req, res) => {
+            const orders = await orderCollection.find().toArray();
+            res.send(orders);
+        });
+
         /*       app.get('/order/:email', verifyJWT, async (req, res) => {
                   const customer = req.query.customer;
                   const decodedEmail = req.decoded.email;
